@@ -1,0 +1,6 @@
+node_modules
+*.bs.js
+/lib
+/.merlin
+/.bsb.lock
+/index.js

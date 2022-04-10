@@ -1,0 +1,11 @@
+.gcloudignore
+.git
+.gitignore
+node_modules
+*.res
+bsconfig.json
+.merlin
+/lib
+src
+package-log.json
+webpack.config.js
