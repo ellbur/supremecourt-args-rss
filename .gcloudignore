@@ -6,6 +6,4 @@ node_modules
 bsconfig.json
 .merlin
 /lib
-src
-package-log.json
 webpack.config.js
