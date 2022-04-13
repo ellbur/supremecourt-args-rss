@@ -4,6 +4,8 @@ let alen = Js.Array.length
 let afe = Js.Array2.forEach
 let log = Js.Console.log
 let x = Belt.Option.getExn
+type promise<'a> = Promise.t<'a>
+open Model
 
 type axiosRes = {
   responseUrl: string
@@ -21,22 +23,19 @@ type htmlElement = {
   text: string
 }
 @module("node-html-parser") external parseHTML: string => htmlElement = "parse"
-@send external getElementsByTagName: (htmlElement, string) => Js.Array.t<htmlElement> = "getElementsByTagName"
+@send external getElementsByTagName: (htmlElement, string) => array<htmlElement> = "getElementsByTagName"
+@send external querySelectorAll: (htmlElement, string) => array<htmlElement> = "querySelectorAll"
 @send external getAttribute: (htmlElement, string) => string = "getAttribute"
-
-type arg = {
-  caption: string,
-  date: Js.Date.t,
-  mp3Path: string
-}
 
 let tableURL = "https://www.supremecourt.gov/oral_arguments/argument_audio.aspx"
 
-let getMP3URL = argPageURL => {
-  ()
+type indexPageEntry = {
+  caption: string,
+  date: Js.Date.t,
+  pageURL: string
 }
 
-let listArgs: () => Promise.t<Js.Array.t<arg>> = () => {
+let listIndexPage: () => promise<array<indexPageEntry>> = () => {
   axiosGet(tableURL)->then(resp => {
     let res = [ ]
     
@@ -70,7 +69,11 @@ let listArgs: () => Promise.t<Js.Array.t<arg>> = () => {
                 ~date=dayNumber->Belt.Int.toFloat,
                 ()
               )
-              log([caption, date->Js.Date.toUTCString, argPageURL])
+              res->Js.Array2.push({
+                caption: caption,
+                date: date,
+                pageURL: argPageURL
+              })->ignore
             }
           }
         }
@@ -81,10 +84,44 @@ let listArgs: () => Promise.t<Js.Array.t<arg>> = () => {
   })
 }
 
-//listArgs()->then(args => {
-//  log(args)
-//  Promise.resolve()
-//})->ignore
+let getMP3URL: string => promise<string> = argPageURL => {
+  axiosGet(argPageURL)->then(resp => {
+    let html = resp.data
+    let doc = parseHTML(html)
+    let links = doc->querySelectorAll("div.datafield > table > tr > td > a")
+    
+    let found = links->Js.Array2.find(elem => elem->getAttribute("href")->Js.String2.endsWith("mp3"))->x
+    Promise.resolve(found->getAttribute("href"))
+  })
+}
 
-getMP3URL("https://www.supremecourt.gov/oral_arguments/audio/2021/20-480")->ignore
+let inSequence = promises => {
+  let res = [ ]
+  let rec step = i => {
+    if i < promises->alen {
+      promises[i]->then(x => {
+        res->Js.Array2.push(x)->ignore
+        step(i + 1)
+      })
+    }
+    else {
+      Promise.resolve(res)
+    }
+  }
+  step(0)
+}
+
+let listArgs: () => promise<Js.Array.t<arg>> = () => {
+  listIndexPage()->then(entries => {
+    entries->Js.Array2.map(entry => {
+      getMP3URL(entry.pageURL)->then(mp3URL => {
+        Promise.resolve({
+          caption: entry.caption,
+          date: entry.date,
+          mp3URL: mp3URL
+        })
+      })
+    })->inSequence
+  })
+}
 
