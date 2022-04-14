@@ -1,9 +1,9 @@
 .gcloudignore
 .git
 .gitignore
-node_modules
+/node_modules
 *.res
 bsconfig.json
 .merlin
-/lib
+/lib/bs
 webpack.config.js
