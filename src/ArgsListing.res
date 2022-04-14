@@ -95,6 +95,12 @@ let getMP3URL: string => promise<string> = argPageURL => {
   })
 }
 
+let safeMP3URL = (argPageURL, caption) => {
+  let encodedURL = NodeJs.Buffer.fromString(argPageURL)->NodeJs.Buffer.toStringWithEncoding(NodeJs.StringEncoding.base64)
+  let encodedCaption = Js.Global.encodeURIComponent(caption)
+  `https://us-central1-theservices-346722.cloudfunctions.net/supremeCourtRedirectToMP3/${encodedURL}/${encodedCaption}.mp3`
+}
+
 let inSequence = promises => {
   let res = [ ]
   let rec step = i => {
@@ -113,15 +119,14 @@ let inSequence = promises => {
 
 let listArgs: () => promise<Js.Array.t<arg>> = () => {
   listIndexPage()->then(entries => {
-    entries->Js.Array2.map(entry => {
-      getMP3URL(entry.pageURL)->then(mp3URL => {
-        Promise.resolve({
-          caption: entry.caption,
-          date: entry.date,
-          mp3URL: mp3URL
-        })
-      })
-    })->inSequence
+    Promise.resolve(entries->Js.Array2.map(entry => {
+      let mp3URL = safeMP3URL(entry.pageURL, entry.caption)
+      {
+        caption: entry.caption,
+        date: entry.date,
+        mp3URL: mp3URL
+      }
+    }))
   })
 }
 

@@ -2,17 +2,19 @@
 let log = Js.Console.log
 
 type rss = {
-  "$": {
-    "version": string
-  },
-  "channel": {
-    "title": string,
-    "description": string,
-    "item": array<{
+  "rss": {
+    "$": {
+      "version": string
+    },
+    "channel": {
       "title": string,
-      "link": string,
-      "pubDate": string
-    }>
+      "description": string,
+      "item": array<{
+        "title": string,
+        "link": string,
+        "pubDate": string
+      }>
+    }
   }
 }
 
@@ -24,7 +26,7 @@ open Model
 
 let generateRSS = args => {
   let builder = newBuilder()
-  builder->buildObjectRSS({
+  builder->buildObjectRSS({"rss": {
     "$": {
       "version": "2.0"
     },
@@ -39,6 +41,6 @@ let generateRSS = args => {
         }
       })
     }
-  })
+  } })
 }
 
