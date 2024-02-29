@@ -5,6 +5,7 @@ let generateRSS = RSSGeneration.generateRSS
 let log = Js.Console.log
 let then = Promise.then
 let thenResolve = Promise.thenResolve
+let x = Belt.Option.getExn
 
 type request = {
   "path": string,
@@ -30,9 +31,8 @@ http("supremeCourtArgsRSS", (_req, res) => {
 })
 
 http("supremeCourtRedirectToMP3", (req, res) => {
-  let url = req["url"]
   let tokens = req["url"]->Js.String2.split("/")
-  let encodedURL = tokens[tokens->Js.Array2.length - 2]
+  let encodedURL = tokens[tokens->Js.Array2.length - 2]->x
   let fullURL = NodeJs.Buffer.fromStringWithEncoding(encodedURL, NodeJs.StringEncoding.base64)->NodeJs.Buffer.toString
   getMP3URL(fullURL)->thenResolve(mp3URL => {
     res->status(302)

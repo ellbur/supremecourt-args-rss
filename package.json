@@ -2,24 +2,23 @@
   "name": "supremecourt-args-rss",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@google-cloud/functions-framework": "^3.0.0",
-    "axios": "0.26.1",
+    "axios": "1.6.5",
     "xml2js": "0.4.23",
-    "node-html-parser": "5.3.3"
+    "node-html-parser": "5.3.3",
+    "@rescript/core": "0.6.0",
+    "rescript-nodejs": "16.0.0"
   },
-  "main": "lib/js/src/Index.bs.js",
+  "main": "lib/es6/src/main/Index.res.mjs",
   "scripts": {
-    "build:rs": "rescript",
-    "clean:rs": "rescript clean -with-deps",
+    "build:rs": "rescript build",
+    "clean:rs": "rescript clean",
     "start:rs": "rescript build -w",
-    "build:copy": "mkdir -p lib/node_modules/@ryyppy/rescript-promise/lib/js/src && cp node_modules/@ryyppy/rescript-promise/lib/js/src/*.bs.js lib/node_modules/@ryyppy/rescript-promise/lib/js/src/ && mkdir -p lib/node_modules/rescript-url/lib/js/src && cp node_modules/rescript-url/lib/js/src/*.bs.js lib/node_modules/rescript-url/lib/js/src/",
-    "build": "npm run build:rs && npm run build:copy && mkdir -p lib/node_modules/rescript/lib/js && cp node_modules/rescript/lib/js/*.js lib/node_modules/rescript/lib/js && mkdir -p lib/node_modules/rescript-nodejs/lib/js/src && cp node_modules/rescript-nodejs/lib/js/src/*.js lib/node_modules/rescript-nodejs/lib/js/src"
+    "build": "npm run build:rs"
   },
   "devDependencies": {
-    "rescript": "9.1.4",
-    "@ryyppy/rescript-promise": "2.1.0",
-    "rescript-url": "0.1.3",
-    "rescript-nodejs": "14.2.0"
+    "rescript": "11.0.0"
   }
 }
