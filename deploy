@@ -1,0 +1,6 @@
+#!/bin/zsh
+
+npm run build
+
+gcloud functions deploy supremeCourtArgsRSS --runtime nodejs20 --trigger-http --allow-unauthenticated
+

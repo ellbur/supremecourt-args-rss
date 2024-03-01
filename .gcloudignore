@@ -3,7 +3,6 @@
 .gitignore
 deploy
 /node_modules
-/src/test
 .merlin
 /lib
 /working

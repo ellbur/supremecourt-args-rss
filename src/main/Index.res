@@ -3,8 +3,6 @@ let listArgs = ArgsListing.listArgs
 let getMP3URL = ArgsListing.getMP3URL
 let generateRSS = RSSGeneration.generateRSS
 let log = Js.Console.log
-let then = Promise.then
-let thenResolve = Promise.thenResolve
 let x = Belt.Option.getExn
 
 type request = {
@@ -19,7 +17,13 @@ type httpFunction = (request, response) => ()
 @send external status: (response, int) => () = "status"
 
 http("supremeCourtArgsRSS", (_req, res) => {
-  listArgs()->thenResolve(generateRSS)->thenResolve(rss => {
+  let main = async () => {
+    let args = await listArgs()
+    let rss = generateRSS(args)
+    rss
+  }
+  
+  main()->Promise.thenResolve(rss => {
     res->set("Content-Type", "application/rss+xml")
     res->send(rss)
   })->Promise.catch(e => {
@@ -31,10 +35,14 @@ http("supremeCourtArgsRSS", (_req, res) => {
 })
 
 http("supremeCourtRedirectToMP3", (req, res) => {
-  let tokens = req["url"]->Js.String2.split("/")
-  let encodedURL = tokens[tokens->Js.Array2.length - 2]->x
-  let fullURL = NodeJs.Buffer.fromStringWithEncoding(encodedURL, NodeJs.StringEncoding.base64)->NodeJs.Buffer.toString
-  getMP3URL(fullURL)->thenResolve(mp3URL => {
+  let main = async () => {
+    let tokens = req["url"]->Js.String2.split("/")
+    let encodedURL = tokens[tokens->Js.Array2.length - 2]->x
+    let fullURL = NodeJs.Buffer.fromStringWithEncoding(encodedURL, NodeJs.StringEncoding.base64)->NodeJs.Buffer.toString
+    await getMP3URL(fullURL)
+  }
+  
+  main()->Promise.thenResolve(mp3URL => {
     res->status(302)
     res->set("Location", mp3URL)
     res->send("")

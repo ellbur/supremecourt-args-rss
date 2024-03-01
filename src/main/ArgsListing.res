@@ -38,6 +38,8 @@ let getIndexPage: () => promise<(htmlElement, string)> = () => {
 }
 
 let parseIndexPage: (htmlElement, string) => array<indexPageEntry> = (body, landingURL) => {
+  let landingURL = NodeJs.Url.make(landingURL)
+  
   let res = [ ]
 
   let trs = body->getElementsByTagName("tr")
@@ -51,8 +53,8 @@ let parseIndexPage: (htmlElement, string) => array<indexPageEntry> = (body, land
         let spans = td1->getElementsByTagName("span")
         if spans->alen == 2 {
           let caption = (spans[1]->x).text
-          let argPageRelURL = links[0]->x->getAttribute("href")->NodeJs.Url.make
-          let argPageURL = NodeJs.Url.fromBaseUrl(~base=argPageRelURL, ~input=landingURL)->NodeJs.Url.format
+          let argPageRelURL = links[0]->x->getAttribute("href")
+          let argPageURL = NodeJs.Url.fromBaseUrl(~base=landingURL, ~input=argPageRelURL)->NodeJs.Url.format
           let dateString = td2.text
 
           let dateTokens = dateString->Js.String2.split("/")
